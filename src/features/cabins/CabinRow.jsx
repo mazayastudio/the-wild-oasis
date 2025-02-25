@@ -3,18 +3,10 @@ import {formatCurrency} from "../../utils/helpers.js";
 import {useState} from "react";
 import CreateCabinForm from "./CreateCabinForm.jsx";
 import {useDeleteCabin} from "./useDeleteCabin.js";
-
-const TableRow = styled.div`
-  display: grid;
-  grid-template-columns: 0.6fr 1.8fr 2.2fr 1fr 1fr 1fr;
-  column-gap: 2.4rem;
-  align-items: center;
-  padding: 1.4rem 2.4rem;
-
-  &:not(:last-child) {
-    border-bottom: 1px solid var(--color-grey-100);
-  }
-`;
+import Table from "../../ui/Table.jsx";
+import {HiSquare2Stack} from "react-icons/hi2";
+import {HiPencil, HiTrash} from "react-icons/hi";
+import {useCreateCabin} from "./useCreateCabin.js";
 
 const Img = styled.img`
   display: block;
@@ -50,14 +42,27 @@ function CabinRow({cabin}) {
     maxCapacity,
     regularPrice,
     discount,
-    image
+    image,
+    description
   } = cabin;
   const [show, setShow] = useState(false);
   const {isDeleting, deleteCabin} = useDeleteCabin();
+  const {isCreating, createCabin} = useCreateCabin();
+
+  function handleDuplicate() {
+    createCabin({
+      name: `Copy of ${name}`,
+      maxCapacity,
+      regularPrice,
+      discount,
+      image,
+      description
+    });
+  }
 
   return (
     <>
-      <TableRow>
+      <Table.Row>
         <Img src={image} alt={name} />
         <Cabin>{name}</Cabin>
         <div>Fits up to {maxCapacity} guests</div>
@@ -66,15 +71,18 @@ function CabinRow({cabin}) {
           ? <Discount>{formatCurrency(discount)}</Discount>
           : <span>&mdash;</span>}
         <div>
-          <button onClick={() => setShow(show => !show)}>Edit</button>
+          <button disabled={isCreating} onClick={handleDuplicate}>
+            <HiSquare2Stack />
+          </button>
+          <button onClick={() => setShow(show => !show)}><HiPencil /></button>
           <button
             onClick={() => deleteCabin(cabinId)}
             disabled={isDeleting}
           >
-            Delete
+            <HiTrash />
           </button>
         </div>
-      </TableRow>
+      </Table.Row>
       {show && <CreateCabinForm cabinToEdit={cabin} />}
     </>
   );
